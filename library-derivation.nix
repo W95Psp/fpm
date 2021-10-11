@@ -1,4 +1,4 @@
-{ nixlib, mkDerivation, fstar-dependencies, findutils }:
+{ nixlib, mkDerivation, fstar-dependencies, findutils, ... }:
 let
   mk = lib: let
     plugin-entrypoints = lib.plugin-entrypoints or [];
@@ -20,23 +20,20 @@ let
           ''ln -s ${path} ./modules/${nixlib.escapeShellArg (builtins.baseNameOf path)}''
         ) lib.modules
       }
-      for filename in ${bash-list-of (map builtins.baseNameOf lib.plugin-entrypoints)}; do
+      for filename in ${bash-list-of (map builtins.baseNameOf plugin-entrypoints)}; do
          modulename="''${filename%.*}"
          echo "$modulename" >> plugin-modules
          ocamlname="''${modulename//./_}"
          cmxsname="$ocamlname.cmxs"
          mkdir out
-         echo "########## C"
-         fstar.exe --include ./modules/ \
+         fstar.exe --include ./modules/ --include ./plugins/ \
                    $(find ./plugins/ \( -type f -or -type l \) -printf "--load_cmxs %P ") \
                    --extract "* -FStar" --odir out --codegen Plugin "$filename"
-         echo "########## D"
          find ./modules/ \( -type f -or -type l \) \( -name '*.ml' -or -name '*.ml' \) \
               -printf '%P\0' | while IFS= read -r -d ''' f; do
               rm -r "./out/$f"
               ln -s "./modules/$f" "./out/$f"
          done
-         echo "########## E"
          cd out
          ocamlbuild -use-ocamlfind -cflag -g -package fstar-tactics-lib "$cmxsname"
          cp "_build/$cmxsname" "../plugins/$cmxsname"
