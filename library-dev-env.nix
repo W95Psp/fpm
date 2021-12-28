@@ -1,10 +1,10 @@
-{ nixlib, mkDerivation, writeShellScriptBin, writeShellScript, fstar-bin, z3-bin, fstar-dependencies, findutils, mkShell }:
+{ nixlib, mkDerivation, writeShellScriptBin, writeShellScript, fstar-bin-flags-of-lib, fstar-bin, z3-bin, fstar-dependencies, findutils, mkShell }:
 let
   library-derivation = import ./library-derivation.nix {
-    inherit nixlib mkDerivation fstar-dependencies findutils;
+    inherit nixlib mkDerivation fstar-dependencies fstar-bin-flags-of-lib findutils;
   };
   checked = import ./checked.nix {
-    inherit nixlib mkDerivation fstar-dependencies fstar-bin z3-bin findutils;
+    inherit nixlib mkDerivation fstar-dependencies fstar-bin fstar-bin-flags-of-lib z3-bin findutils;
   };
   FPM_LOCAL_MODULES-script = ''
     IFS=':' read -ra modules <<< "$FPM_LOCAL_MODULES"
@@ -28,9 +28,13 @@ let
     fi 
     FSTAR_INCLUDES="$FSTAR_INCLUDES$SEP$FSTAR_EXTRA_INCLUDES"
   '';
+in
+lib:
+let
+  fstar-bin-flags = fstar-bin-flags-of-lib lib;
   fstar-script = ''
     IFS=':' read -ra includes <<< "$FSTAR_INCLUDES"
-    ${fstar-bin}/bin/fstar.exe \
+    ${fstar-bin-flags.bin}/bin/fstar.exe ${fstar-bin-flags.flags} \
           $(for i in "''${includes[@]}"; do printf -- "--include %s " "$i"; done) \
           $(test -z "$FPM_LIB_PATH" || (cat "$FPM_LIB_PATH/plugin-modules" | xargs -IX -- echo "--load_cmxs X" | paste -sd " " -)) \
           $([ -z "$FPM_LIB_CHECKED_FILES" ] || {
@@ -45,15 +49,12 @@ let
                 fi   
                 echo "--cache_dir $CHECKED_CACHE_PATH"
               fi
-            }
+          }
           ) \
           "$@"
   '';
-in
-lib:
-let
-  empty-lib = {
-      name = "${lib.name}-dependencies";
+empty-lib = {
+  name = "${lib.name}-dependencies";
       modules = [];
       inherit (lib) dependencies;
       plugin-entrypoints = [];

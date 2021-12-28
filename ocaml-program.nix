@@ -1,11 +1,11 @@
-{ nixlib, mkDerivation, writeShellScriptBin, writeShellScript, fstar-bin, z3-bin, fstar-dependencies, findutils, mkShell }:
+{ nixlib, mkDerivation, writeShellScriptBin, writeShellScript, fstar-bin-flags-of-lib, z3-bin, fstar-dependencies, findutils, mkShell, ... }:
 let
   validator = import ./validator.nix nixlib;
   library-derivation = import ./library-derivation.nix {
-    inherit nixlib mkDerivation fstar-dependencies findutils;
+    inherit nixlib mkDerivation fstar-dependencies fstar-bin-flags-of-lib findutils;
   };
   checked = import ./checked.nix {
-    inherit nixlib mkDerivation fstar-dependencies fstar-bin z3-bin findutils;
+    inherit nixlib mkDerivation fstar-dependencies fstar-bin-flags-of-lib z3-bin findutils;
   };
 in
 {
@@ -32,15 +32,18 @@ let
         else throw ''`target` was expected to be "byte" or "native", got "${toString target}"''
       )
       (validator lib next);
+  fstar-bin-flags = fstar-bin-flags-of-lib lib;
+  modules-path = nixlib.escapeShellArg "${der}/modules/";
 in
 validator' lib
   (mkDerivation {
     name = "${name}";
     phases = ["extractionPhase" "buildPhase" "installPhase"];
-    buildInputs = fstar-dependencies ++ (map (p: p.package) ocaml-packages);
+    buildInputs = [fstar-bin-flags.bin] ++ fstar-dependencies ++ (map (p: p.package) ocaml-packages);
     extractionPhase = ''
       mkdir ocaml-sources
-      fstar.exe --include ${nixlib.escapeShellArg "${der}/modules/"} \
+      fstar.exe ${fstar-bin-flags.flags}\
+                --include ${modules-path} \
                 --include ${nixlib.escapeShellArg "${der}/plugins/"} \
                 $(cat ${nixlib.escapeShellArg "${der}/plugin-modules"} | xargs -IX -- echo "--load_cmxs X" | paste -sd " " -) \
                 --extract "* -FStar" --odir ocaml-sources --codegen OCaml \
@@ -48,12 +51,30 @@ validator' lib
     '';
     buildPhase = ''
       # Copy (and possibly overwrite) OCaml modules
-      find "${der}/modules/" \( -name "*.ml" -or -name "*.mli" \) -exec ln -fs {} ocaml-sources \;
-      
+      find ${modules-path} \( -name "*.ml" -or -name "*.mli" \) -printf "%P\0" | 
+        while IFS= read -r -d ''' filename; do
+            modulename="''${filename%.*}"
+            ocamlname="''${modulename//./_}.ml"
+            if test -f ${modules-path}/"$modulename.fsti" \
+               || test -f ${modules-path}/"$modulename.fst"; then
+               ln -fs ${modules-path}/"$filename" ocaml-sources/"$ocamlname"
+            else
+               ln -fs ${modules-path}/"$filename" ocaml-sources/
+            fi
+        done
       # echo "let _ = exit (if Main.main (Array.to_list Sys.argv) then 0 else 1)" > 
       cd ocaml-sources
-      echo "let _ = ${nixlib.head (builtins.match "^(.*)\.fst$" (builtins.baseNameOf entrypoint))}.main ()" > ${nixlib.escapeShellArg driver-name}.ml
-
+      ${
+        if isNull driver
+        then ''echo "let _ = ${nixlib.head (builtins.match "^(.*)\.fst$" (builtins.baseNameOf entrypoint))}.main ()"''
+        else
+          if builtins.isString driver
+          then "echo ${nixlib.escapeShellArg driver}"
+          else
+            if builtins.isPath driver
+            then "cat ${nixlib.escapeShellArg driver}"
+            else throw "`driver` is of type ${builtins.typeOf driver}, expected null, a string or a path."
+      } > ${nixlib.escapeShellArg driver-name}.ml
       ocamlbuild -use-ocamlfind -lflags ${nixlib.escapeShellArg lflags} \
                  ${nixlib.concatMapStringsSep " " (p: "-package ${nixlib.escapeShellArg p}") (["fstarlib"] ++ map (p: p.name) ocaml-packages)} \
                  ${nixlib.escapeShellArg "${driver-name}.${target}"}

@@ -2,7 +2,9 @@
   description = "LibA";
 
   inputs = {
-    fpm.url = path:../../.;
+    # fpm.url = git+ssh://git@github.com/W95Psp/fpm;
+    fpm.url = path:/home/lucas/Bureau/fpm;
+    # fpm.url = path:../../.;
   };
 
   outputs = { nixpkgs, fpm, ... }:
@@ -16,6 +18,7 @@
           ./LibC.ModX.fst
           ./LibC.ModY.fst
           ./LibC.ModZ.fst
+          ./HelloJS.fst
           ./Main.fst
         ];
         plugin-entrypoints = [ ];
@@ -24,6 +27,11 @@
         name = "HelloWorld";
         dependencies = [lib];
         entrypoint = ./Main.fst;
+      }];
+      js-programs = [{
+        name = "HelloJavaScript";
+        dependencies = [lib];
+        entrypoint = ./HelloJS.fst;
       }];
     };
 }

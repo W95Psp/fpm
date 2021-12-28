@@ -4,48 +4,29 @@
   inputs = {
     flake-utils.url = "github:numtide/flake-utils";
     fstar-flake.url = "github:W95Psp/nix-flake-fstar";
-    fpm.url = "github:W95Psp/nix-flake-fstar";
+    zarith_stubs_js = {
+      url = "github:janestreet/zarith_stubs_js";
+      flake = false;
+    };
   };
   
-  outputs = { self, nixpkgs, flake-utils, fstar-flake, fpm }:
+  outputs = { self, nixpkgs, flake-utils, zarith_stubs_js, fstar-flake }:
     let
       nixlib = nixpkgs.lib;
       fn = import ./functions.nix nixlib;
       validatior = import ./validator.nix nixlib;
-      functions = system:
-        {
-          fstar-patches ? [],
-          fstar-override ? null
-            # { name = "fstar-version-blabla";
-            #   src = pkgs.fetchFromGitHub {
-            #     owner = "FStarLang";
-            #     repo = "FStar";
-            #     rev = "54ddadbdd8aa36b2bbb60b3c0a24fc4bfa3e90ce";
-            #     sha256 = "sha256-mm4i5Ta/TMAXB6qlEO09BZZ9xHlbzzInXJrWX+Fp9uQ=";
-            #   };
-            # }
-        }:
+      functions = system: fstar-options:
         let
           pkgs = nixpkgs.legacyPackages.${system};
           pkgs-fstar = fstar-flake.packages.${system};
           tools = fstar-flake.lib.${system};
-          fstar-bin =
-            let
-              base' = pkgs-fstar.fstar;
-              base  = if isNull fstar-override then base'
-                      else base'.override fstar-override;
-            in
-              if nixlib.length fstar-patches == 0
-              then base.fstar
-              else 
-                tools.perform-fstar-to-ocaml base.fstar
-                  (pkgs-fstar.fstar.overrideAttrs 
-                    (o: {patches = o.patches ++ fstar-patches;}));
+          fstar-bin-tools = import ./fstar-options.nix nixlib;
+          fstar-bin-flags-of-lib = lib: fstar-bin-tools.mk-fstar system fstar-flake (fstar-bin-tools.options-of-lib lib);
           opt = {
-            inherit nixlib;
+            inherit nixlib fstar-bin-flags-of-lib;
             inherit (pkgs) writeShellScriptBin writeShellScript mkShell findutils;
             fstar-dependencies =
-              [pkgs-fstar.fstar pkgs-fstar.z3] ++
+              [pkgs-fstar.z3] ++
               (with pkgs.ocamlPackages;
                 [ ocaml
                   ocamlbuild findlib batteries stdint zarith yojson fileutils pprint
@@ -61,15 +42,19 @@
             library-derivation = import ./library-derivation.nix opt;
             library-dev-env = import ./library-dev-env.nix opt;
             ocaml-program = import ./ocaml-program.nix opt;
+            js-program = import ./js/js-program.nix (opt // {
+              inherit (pkgs.ocamlPackages) js_of_ocaml js_of_ocaml-ppx;
+              inherit zarith_stubs_js;
+            });
           };
     in
       {
         __functor =
           _: {
             lib ? null,
+            fstar-options ? {},
             ocaml-programs ? [],
-            fstar-patches  ? [],
-            fstar-override ? []
+            js-programs ? []
           }:
           {
             inherit lib;
@@ -77,11 +62,13 @@
           flake-utils.lib.eachSystem [ "x86_64-darwin" "x86_64-linux" "aarch64-linux"]
             (system:
               let
-                f = functions system {inherit fstar-patches;};
+                f = functions system fstar-options;
                 s = {
                   fstar-lib = lib;
                   packages = nixlib.listToAttrs (
                     (map (prog: {name = prog.name; value = f.ocaml-program prog;}) ocaml-programs)
+                    ++
+                    (map (prog: {name = prog.name; value = f.js-program prog;}) js-programs)
                   );
                   devShell = f.library-dev-env lib;
                 };

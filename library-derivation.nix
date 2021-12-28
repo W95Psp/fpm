@@ -1,12 +1,13 @@
-{ nixlib, mkDerivation, fstar-dependencies, findutils, ... }:
+{ nixlib, mkDerivation, fstar-dependencies, findutils, fstar-bin-flags-of-lib, ... }:
 let
   mk = lib: let
     plugin-entrypoints = lib.plugin-entrypoints or [];
     bash-list-of = l: nixlib.concatMapStringsSep " " (x: nixlib.escapeShellArg "${x}") l;
+    fstar-bin-flags = fstar-bin-flags-of-lib lib;
   in mkDerivation {
     name = "${lib.name}-lib";
     phases = [ "buildPhase" "installPhase" ];
-    buildInputs = [findutils] ++ fstar-dependencies;
+    buildInputs = [findutils fstar-bin-flags.bin] ++ fstar-dependencies;
     buildPhase = ''
       mkdir modules plugins
       touch plugin-modules
@@ -26,7 +27,8 @@ let
          ocamlname="''${modulename//./_}"
          cmxsname="$ocamlname.cmxs"
          mkdir out
-         fstar.exe --include ./modules/ --include ./plugins/ \
+         fstar.exe ${fstar-bin-flags.flags} \
+                   --include ./modules/ --include ./plugins/ \
                    $(find ./plugins/ \( -type f -or -type l \) -printf "--load_cmxs %P ") \
                    --extract "* -FStar" --odir out --codegen Plugin "$filename"
          find ./modules/ \( -type f -or -type l \) \( -name '*.ml' -or -name '*.ml' \) \

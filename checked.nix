@@ -1,4 +1,4 @@
-{ nixlib, mkDerivation, fstar-dependencies, fstar-bin, z3-bin, findutils }:
+{ nixlib, mkDerivation, fstar-dependencies, fstar-bin, z3-bin, findutils, ... }:
 let
   mkder = import ./library-derivation.nix { inherit nixlib mkDerivation fstar-dependencies findutils; };
   generate-checked = lib:
