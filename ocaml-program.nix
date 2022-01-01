@@ -21,7 +21,8 @@ in
 }:
 let
   lib = {
-    inherit name modules dependencies;
+    inherit name dependencies;
+    modules = nixlib.unique ([entrypoint] ++ modules);
   };
   der = library-derivation lib;
   driver-name = "OCamlDriver";
