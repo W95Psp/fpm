@@ -70,6 +70,16 @@
                     ++
                     (map (prog: {name = prog.name; value = f.js-program prog;}) js-programs)
                   );
+                  devShells = nixlib.listToAttrs (
+                    let h = prog: {
+                          name = prog.name;
+                          value = lib // {
+                            name = lib.name + "-" + prog.name;
+                            dependencies = lib.dependencies ++ prog.dependencies;
+                          };
+                        };
+                    in (map h ocaml-programs) ++ (map h js-programs)
+                  );
                   devShell = f.library-dev-env lib;
                 };
                 package-names = builtins.attrNames s.packages;
