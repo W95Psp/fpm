@@ -4,7 +4,7 @@ module U = JS.Primitives.Unsafe
 module L = FStar.List.Tot
 open JS.Effect
 
-type js_obj _ = U.js_any
+type js_obj' _ = U.js_any
 let undefinedType = U.js_any
 let nullType = U.js_any
 
@@ -23,5 +23,6 @@ irreducible let t_list _ = unit
 let call #d nth o this args
   = unsafe_coerce (U.call (unsafe_coerce o) (unsafe_coerce this) (unsafe_coerce args))
 
-
+let coerce (#d: js_obj_d) (o: U.js_any): js_obj' d
+  = unsafe_coerce_pure o
 
