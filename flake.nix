@@ -71,14 +71,14 @@
                     (map (prog: {name = prog.name; value = f.js-program prog;}) js-programs)
                   );
                   devShells = nixlib.listToAttrs (
-                    let h = prog: {
+                    let h = more: prog: {
                           name = prog.name;
-                          value = lib // {
+                          value = f.library-dev-env (lib // {
                             name = lib.name + "-" + prog.name;
-                            dependencies = lib.dependencies ++ prog.dependencies;
-                          };
+                            dependencies = lib.dependencies ++ prog.dependencies ++ more;
+                          });
                         };
-                    in (map h ocaml-programs) ++ (map h js-programs)
+                    in (map (h []) ocaml-programs) ++ (map (h [(import ./js/JS-Lib)]) js-programs)
                   );
                   devShell = f.library-dev-env lib;
                 };
