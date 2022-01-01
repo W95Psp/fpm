@@ -45,7 +45,7 @@ let
     '';
     installPhase = ''
       mkdir $out
-      mv plugin-modules $out/plugin-modules
+      cat plugin-modules | sort -u > $out/plugin-modules
       mv modules $out/modules
       mv plugins $out/plugins
     '';
