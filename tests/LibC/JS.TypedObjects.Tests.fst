@@ -19,7 +19,7 @@ let test1 (): Js _ =
   let xx = o.["o"] in
   ()
 
-assume val test_o: js_obj (obj_d_of ["a",int;"b",int] [
+assume val test_o0: js_obj (obj_d_of ["a",int;"b",int] [
     ([int;int;int], string);
     ([int;int], string);
     ([int;string], string);
@@ -33,7 +33,24 @@ let test2 (): Js _ =
   let b = obj ["c", (|js_obj (obj_d_of ["a",int;"b",int] []), a|)] in
   let x: js_obj (obj_d_of ["a",int;"b",int] []) = b.["c"] in
   let x = x.["b"] in
-  test_o.["a"] <- (test_o.["a"] + test_o.["b"]);
-  let x: string = test_o.(4,"x") in
+  test_o0.["a"] <- (test_o0.["a"] + test_o0.["b"]);
+  let x: string = (test_o0).(4,"x") in
+  ()
+
+assume val test_o1: js_obj u#0 u#0 u#0 (obj_d_of ["obj", js_obj (
+  obj_d_of ["a",int;"b",int] [
+    ([int;int;int], string);
+    ([int;int], string);
+    ([int;string], string);
+    ([nat], string);
+    ([int], string);
+    ([string], string)
+  ]
+)] [])
+
+unfold let ( @: ) = Mktuple2
+
+let test3 (): Js _ =
+  let x: string = (test_o1 @: "obj").(|3,"4"|) in
   ()
 

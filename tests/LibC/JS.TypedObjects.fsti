@@ -186,3 +186,46 @@ let (.())
 
 val coerce (#d: js_obj_d) (o: U.js_any): js_obj d
 
+let extract_descriptor_tac (t: T.term): T.Tac T.term =
+    let t = T.norm_term [
+      primops; iota; zeta;
+      delta
+      // delta_attr [`%normMark]; delta_only [`%L.map;`%op_Equality;`%js_obj]
+    ] t in
+    let fn, args = T.collect_app t in
+    let fn = T.inspect fn in
+    if not (T.Tv_FVar? fn) then T.fail ("[extract_descriptor_tac:E0] Expected an application, got" ^ T.term_to_string fn);
+    let fn = T.implode_qn (T.inspect_fv (T.Tv_FVar?.v fn)) in
+    if fn <> `%js_obj' then T.fail ("[extract_descriptor_tac:E1] Expected an application like `js_obj' …`, got `"^fn^" …`");
+    match args with
+    | [d,_] -> d
+    | _ -> T.fail "[extract_descriptor_tac:E2] TODO: write error message"
+
+let _ = 
+  T.run_tactic (fun _ -> 
+    let t = quote (js_obj (obj_d_of [] [])) in
+    let t = extract_descriptor_tac t in
+    T.print (T.term_to_string t)
+  )
+
+// TODO: unify `o.(|…|)` and `o.(…)`
+// pretty easy: take `o` of any type `t`, meta-program decide wether `t` is a tuple
+//   - if `t` tuple, then we should behave like `.(|…|)`
+//   - otherwise, `.(…)`
+let (.(||))
+  (#d0: js_obj_d u#0 u#0 u#0)
+  (#inTup: Type) {| i: tup_to_list inTup |}
+  ($oTup: js_obj d0 * string)
+  (#[T.exact (extract_descriptor_tac (quote (d0.props (StringJsKind (snd oTup)))))] d: js_obj_d {
+    normalize_term (js_obj d == d0.props (StringJsKind (snd oTup)))
+  })
+  (#[compute_fun_signature d.fn_overloadings i.extract_type_list]nth: nat {nth < L.length d.fn_overloadings})
+  (v: inTup {normalize_term (
+    let inputs, output = L.index d.fn_overloadings nth in
+    L.length i.extract_type_list == L.length inputs /\
+    (forall j. L.index i.extract_type_list j `subtype_of` L.index inputs j)
+  )}) = 
+    let o, key = oTup in
+    let f = o.[key] in
+    call_overloaded #d #inTup #i #nth f (U.inject o) v
+
