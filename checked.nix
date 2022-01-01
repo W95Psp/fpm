@@ -1,6 +1,7 @@
-{ nixlib, mkDerivation, fstar-dependencies, fstar-bin, z3-bin, findutils, ... }:
+{ nixlib, mkDerivation, fstar-dependencies, fstar-bin, z3-bin,
+  fstar-bin-flags-of-lib, findutils, ... }:
 let
-  mkder = import ./library-derivation.nix { inherit nixlib mkDerivation fstar-dependencies findutils; };
+  mkder = import ./library-derivation.nix { inherit nixlib mkDerivation fstar-dependencies findutils fstar-bin-flags-of-lib; };
   generate-checked = lib:
     let
       src = mkder lib;

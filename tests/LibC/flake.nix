@@ -18,7 +18,6 @@
           ./LibC.ModX.fst
           ./LibC.ModY.fst
           ./LibC.ModZ.fst
-          ./HelloJS.fst
           ./Main.fst
         ];
         plugin-entrypoints = [ ];

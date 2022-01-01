@@ -34,6 +34,9 @@ let
   fstar-bin-flags = fstar-bin-flags-of-lib lib;
   fstar-script = ''
     IFS=':' read -ra includes <<< "$FSTAR_INCLUDES"
+    if [ -z "$FPM_DEBUG_WRAPPER" ]; then
+       set -x
+    fi
     ${fstar-bin-flags.bin}/bin/fstar.exe ${fstar-bin-flags.flags} \
           $(for i in "''${includes[@]}"; do printf -- "--include %s " "$i"; done) \
           $(test -z "$FPM_LIB_PATH" || (cat "$FPM_LIB_PATH/plugin-modules" | xargs -IX -- echo "--load_cmxs X" | paste -sd " " -)) \
@@ -62,6 +65,7 @@ empty-lib = {
 in
 mkShell rec {
   name = "${lib.name}-dev-env";
+  FPM_NAME = lib.name;
   FPM_LOCAL_MODULES = nixlib.concatStringsSep ":" (map toString lib.modules);
   FPM_LIB_PATH = library-derivation empty-lib;
   FPM_LIB_CHECKED_FILES = checked empty-lib;
