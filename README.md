@@ -7,17 +7,17 @@ Given a list of F* modules and of (git-based) F* dependencies, FPM automatically
  
 # Example
 ## OCaml Hello World
-The example [hello-ocaml-world](examples/hello-ocaml-world) consists in one module with no dependencies, that just prints an `"Hello World"` after extraction to OCaml and after compilation.
+The example [hello-ocaml-world](examples/hello-ocaml-world) consists in one module, that just prints an `"Hello World"` after OCaml extraction and compilation. The example is really small and has no external F* dependency.
 
-The module is very simple:
-```
+The `Main.fst` module is very simple:
+```fstar
 module Main
 let main () = 
   FStar.IO.print_string "Hello world!"
 ```
 
 The file `flake.nix` contains the library and program declaration:
-```
+```nix
 {
   description = "hello-word-fstar";
   
@@ -45,13 +45,20 @@ The file `flake.nix` contains the library and program declaration:
 }
 ```
 
-Running `nix run` produces `Hello World!` in the console! It automatically:
+### Running the native binary
+Running `nix run` (or `nix run .#hello-world`) produces `Hello World!` in the console! It automatically:
  1. fetches an F* binary;
  2. pulls and sets up every F* depenedncies (here, none);
  3. compile declared plugins entrypoints (here, none, again) into native ones;
  4. extracts the module `Main.fst` into `Main.ml`;
  5. compile `Main.ml` with the correct OCaml libraries;
  6. runs the resulting program.
+
+### Compiling the native binary
+`nix build` (or `nix build .#hello-world`)
+
+### Getting a shell with F* properly configured
+`nix develop` will drop you in a shell with an `fstar.exe` binary available, configured so that all dependencies and native F* plugins are loaded automatically (again, in this example there's no dependency nor any native plugins).
 
 # Bigger example
 TODO
