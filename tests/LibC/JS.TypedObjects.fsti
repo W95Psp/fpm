@@ -186,6 +186,7 @@ let (.())
 
 val coerce (#d: js_obj_d) (o: U.js_any): js_obj d
 
+noextract 
 let extract_descriptor_tac (t: T.term): T.Tac T.term =
     let t = T.norm_term [
       primops; iota; zeta;
@@ -201,12 +202,12 @@ let extract_descriptor_tac (t: T.term): T.Tac T.term =
     | [d,_] -> d
     | _ -> T.fail "[extract_descriptor_tac:E2] TODO: write error message"
 
-let _ = 
-  T.run_tactic (fun _ -> 
-    let t = quote (js_obj (obj_d_of [] [])) in
-    let t = extract_descriptor_tac t in
-    T.print (T.term_to_string t)
-  )
+// let _ = 
+//   T.run_tactic (fun _ -> 
+//     let t = quote (js_obj (obj_d_of [] [])) in
+//     let t = extract_descriptor_tac t in
+//     T.print (T.term_to_string t)
+//   )
 
 // TODO: unify `o.(|…|)` and `o.(…)`
 // pretty easy: take `o` of any type `t`, meta-program decide wether `t` is a tuple

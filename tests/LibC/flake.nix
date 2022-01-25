@@ -13,11 +13,17 @@
         name = "LibC";
         dependencies = [
           (import ../LibB/package.nix)
+          fpm.js-lib
         ];
         modules = [
           ./LibC.ModX.fst
           ./LibC.ModY.fst
           ./LibC.ModZ.fst
+          ./HelloJS.fst
+          ./JS.TypedObjects.fst
+          ./JS.TypedObjects.fsti
+          ./Js.TypedObjects.Utils.fst
+          ./JS.Window.fst
           ./Main.fst
         ];
         plugin-entrypoints = [ ];
