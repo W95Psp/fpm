@@ -7,7 +7,7 @@ Given a list of F* modules and of (git-based) F* dependencies, FPM automatically
  
 # Example
 ## OCaml Hello World
-The example [hello-ocaml-world](examples/hello-ocaml-world) consist in one module with no dependencies, that just prints an `"Hello World"` after extraction to OCaml and after compilation.
+The example [hello-ocaml-world](examples/hello-ocaml-world) consists in one module with no dependencies, that just prints an `"Hello World"` after extraction to OCaml and after compilation.
 
 The module is very simple:
 ```
