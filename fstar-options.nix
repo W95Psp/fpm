@@ -3,6 +3,7 @@ nixlib:
 # - `override?: set` (defaul `null`);
 # - `unsafe_tactic_exec?: bool` (defaults `false`).
 let
+  # Merge two attrsets of F* options together
   merge = a: b:
     let
       any-has = name: builtins.hasAttr name a || builtins.hasAttr name b;
@@ -26,11 +27,14 @@ let
           }
         else {}
       );
+  # Compute the attrset of F* options for a library, merging every F* options from every dependencies
+  # (a dependency might require a patch or a specific flag to operate)
   options-of-lib = lib:
     nixlib.foldl
       merge
       (lib.fstar-options or {}) 
       (map options-of-lib lib.dependencies);
+  # Compute an F* binary and set of flags given an attrset of F* options
   mk-fstar = system: fstar-flake: options:
     let
       pkgs-fstar = fstar-flake.packages.${system};

@@ -1,3 +1,6 @@
+# This file provides validation of library declarations.
+# TODO: Remove dead code.
+
 nixlib:
 let
   extra = import ./functions.nix nixlib;
