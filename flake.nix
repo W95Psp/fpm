@@ -66,6 +66,12 @@
                 s = {
                   fstar-lib = lib;
                   # For each JS or OCaml program, we generate a derivation
+                  apps = builtins.mapAttrs (_: bin: {
+                    type = "app";
+                    program = "${bin}";
+                  }) s.packages;
+                  # apps = nixlib.listToAttrs (
+                  #   (map (prog: {name = prog.name; value = s.${name};}) ocaml-programs);
                   packages = nixlib.listToAttrs (
                     (map (prog: {name = prog.name; value = f.ocaml-program prog;}) ocaml-programs) ++
                     (map (prog: {name = prog.name; value = f.js-program prog;}) js-programs));
@@ -84,9 +90,12 @@
                   devShell = f.library-dev-env lib;
                 };
                 package-names = builtins.attrNames s.packages;
+                app-names = builtins.attrNames s.apps;
               in
                 s // (if nixlib.length package-names == 1 then {
                   defaultPackage = s.packages.${nixlib.head package-names};
+                } else {}) // (if nixlib.length app-names == 1 then {
+                  defaultApp = s.apps.${nixlib.head app-names};
                 } else {})
             )
         );

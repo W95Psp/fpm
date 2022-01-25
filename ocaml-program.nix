@@ -1,4 +1,6 @@
-{ nixlib, mkDerivation, writeText, runCommand, fstar-bin-flags-of-lib, z3-bin, fstar-bin, fstar-dependencies, findutils, mkShell, ... }:
+{ nixlib, mkDerivation, writeText,
+  # runCommand,
+  fstar-bin-flags-of-lib, z3-bin, fstar-bin, fstar-dependencies, findutils, mkShell, ... }:
 let
   validator = import ./validator.nix nixlib;
   library-derivation = import ./library-derivation.nix {
@@ -52,29 +54,28 @@ let
       buildInputs = [fstar-bin-flags.bin] ++ fstar-dependencies ++ (map (p: p.package) ocaml-packages);
       extractionPhase = ''
         mkdir ocaml-sources
-        if [ -z "$FPM_DEBUG_WRAPPER" ]; then
+        if [ ! -z "$FPM_DEBUG_WRAPPER" ]; then
           # set -x
           echo 'skip'
         fi
-        echo ${
-          builtins.readFile (
-            runCommand "date" {
-              FSTAR_INCLUDES = [modules-path "${der}/plugins/"];
-              FSTAR_PLUGINS = (nixlib.splitString "\n" (builtins.readFile "${der}/plugin-modules"));
-              FSTAR_IN_MODULES = [];
-            } ''
+        echo ${""
+          # builtins.readFile (
+          #   runCommand "date" {
+          #     FSTAR_INCLUDES = [modules-path "${der}/plugins/"];
+          #     FSTAR_PLUGINS = (nixlib.splitString "\n" (builtins.readFile "${der}/plugin-modules"));
+          #     FSTAR_IN_MODULES = [];
+          #   } ''
               
-            ''
-          )
+          #   ''
+          # )
         }
-        exit 1
-        echo "#################################3"
-        echo "#################################3"
-        echo "#################################3"
-        echo '${nixlib.concatMapStringsSep " " nixlib.escapeShellArg (implemented-interfaces ++ [(builtins.baseNameOf entrypoint)])}'
-        echo "#################################3"
-        echo "#################################3"
-        echo "#################################3"
+        # echo "#################################3"
+        # echo "#################################3"
+        # echo "#################################3"
+        # echo '${nixlib.concatMapStringsSep " " nixlib.escapeShellArg (implemented-interfaces ++ [(builtins.baseNameOf entrypoint)])}'
+        # echo "#################################3"
+        # echo "#################################3"
+        # echo "#################################3"
         # TODO: add flag to use cmi: `--cmi --cache_dir $ {nixlib.escapeShellArg (generate-checked lib)}`
         for module in ${nixlib.concatMapStringsSep " " nixlib.escapeShellArg (implemented-interfaces ++ [(builtins.baseNameOf entrypoint)])}; do
           fstar.exe ${fstar-bin-flags.flags}\
