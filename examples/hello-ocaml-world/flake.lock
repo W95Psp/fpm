@@ -38,11 +38,11 @@
         "zarith_stubs_js": "zarith_stubs_js"
       },
       "locked": {
-        "lastModified": 1643141837,
-        "narHash": "sha256-Jl9TuCvkalPpneUQM8LCU/33jMRHp8B2KfV9PEH7wY8=",
+        "lastModified": 1643580232,
+        "narHash": "sha256-QUXtKXziK1DpX//EccLUNPYqsdHBePYiHzwK3bzwZDI=",
         "owner": "W95Psp",
         "repo": "fpm",
-        "rev": "23a2488307284c8fefabff6bdd814737a3edc86e",
+        "rev": "196919f614015a76c71ad8afb2d3fb95f6bcd4df",
         "type": "github"
       },
       "original": {
