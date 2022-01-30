@@ -5,6 +5,8 @@ Given a list of F* modules and of (git-based) F* dependencies, FPM automatically
  - automatic OCaml compilation (if needed);
  - automatic JavaScript compilation (if needed).
  
+Run `nix run github:W95Psp/fpm#create` to interactively setup FPM on a local folder.
+ 
 # Example
 ## OCaml Hello World
 The example [hello-ocaml-world](examples/hello-ocaml-world) consists in one module, that just prints an `"Hello World"` after OCaml extraction and compilation. The example is really small and has no external F* dependency.

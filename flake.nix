@@ -106,6 +106,19 @@
         __functor = self: mkFlake;
         # This flake also declares a few library-independent defintions:
         js-lib = import ./js/JS-Lib;
-      };
+      } // flake-utils.lib.eachSystem [ "x86_64-darwin" "x86_64-linux" "aarch64-linux"] (system:
+        let
+          pkgs = nixpkgs.legacyPackages.${system};
+        in
+          {
+            apps.create = {
+              type = "app";
+              program = "${pkgs.writeShellScript "create-fpm-package" ''
+                 export PATH=${with pkgs; lib.makeBinPath [ fd ripgrep git ]}
+                 ${pkgs.bash}/bin/bash ${./create-package.sh}
+              ''}";
+            };
+          }
+      );
 }
 
