@@ -24,7 +24,8 @@ let
   }:
     let
       lib = {
-        inherit name dependencies;
+        name = "${name}-ocaml-program";
+        inherit dependencies;
         modules = modules;
         # modules = nixlib.unique ([entrypoint] ++ modules);
       };

@@ -1,6 +1,4 @@
 {
-  description = "hello-word-fstar";
-  
   inputs = {
     fpm.url = github:W95Psp/fpm; # fetches FPM
     # here, we would declare F* libraries

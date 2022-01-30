@@ -21,8 +21,6 @@ let main () =
 The file `flake.nix` contains the library and program declaration:
 ```nix
 {
-  description = "hello-word-fstar";
-  
   inputs = {
     fpm.url = github:W95Psp/fpm; # fetches FPM
     # here, we would declare F* libraries, for this example there's nothing
