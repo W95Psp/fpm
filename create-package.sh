@@ -46,7 +46,7 @@ ask_dependency () {
     ask_dependency
 }
 printf "What are the dependency of your package?\n"
-printf "A dependency is expected to be a flake URI (e.g. 'github:owner/repo', `git+ssh://git@somewhere.tld/owner/repo`...).\n"
+printf "A dependency is expected to be a flake URI (e.g. 'github:owner/repo', 'git+ssh://git@somewhere.tld/owner/repo'...).\n"
 printf "Anwser 'n' (or nothing) when your are done.\n"
 ask_dependency
 
