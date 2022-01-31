@@ -37,7 +37,7 @@ ask_dependency () {
        return;
     fi
     tab="    "
-    if name=$(nix eval --raw "$dep"\#lib.name &2>/dev/null); then
+    if name=$(nix --experimental-features "nix-command flakes" eval --raw "$dep"\#lib.name &2>/dev/null); then
 	deps["$name"]="$dep"
 	printf 'Added "%s".\n' "$name"
     else
@@ -85,7 +85,10 @@ FLAKE
   
   printf "%splugin-entrypoints = [\n" "$tab"
   # we extract modules containing entrypoints
-  rg --type-add='fstar:*.fst *.fsti' --type fstar -lU0 '\[@@?[^]]*plugin[^]]*\]' | xargs -IX -0 printf "%s  ./%s\n" "$tab" 'X' | sort -u
+  rg --type-add='fstar:*.fst' --type-add='fstar:*.fsti' --type fstar \
+      -lU0 '\[@@?[^]]*plugin[^]]*\]' | \
+      xargs -IX -0 printf "%s  ./%s\n" "$tab" 'X' | \
+      sort -u
   printf "%s]\n" "$tab"
 } > flake.nix
 

@@ -114,7 +114,7 @@
             apps.create = {
               type = "app";
               program = "${pkgs.writeShellScript "create-fpm-package" ''
-                 export PATH=${with pkgs; lib.makeBinPath [ fd ripgrep git coreutils ]}
+                 export PATH=${with pkgs; lib.makeBinPath [ fd ripgrep git coreutils findutils nixUnstable ]}
                  ${pkgs.bash}/bin/bash ${./create-package.sh}
               ''}";
             };
