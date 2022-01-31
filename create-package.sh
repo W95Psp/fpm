@@ -21,7 +21,7 @@ ask_direnv () {
     read setup_direnv
     setup_direnv="${setup_direnv:=y}"
     case "$setup_direnv" in
-	y) echo "use flake" > .direnv;;
+	y) echo "use flake" > .envrc;;
 	n) ;;
 	*) echo "Please anwser 'y' or 'n'." && ask_direnv;;
     esac
@@ -33,13 +33,13 @@ declare -gA deps
 ask_dependency () {
     printf "Add dependency? (n)"
     read dep
-    if [[ "$dep" == "n" ]]; then
+    if [[ "$dep" == "n" || -z "$dep" ]]; then
        return;
     fi
     tab="    "
-    if name=$(nix --experimental-features "nix-command flakes" eval --raw "$dep"\#lib.name &2>/dev/null); then
-	deps["$name"]="$dep"
-	printf 'Added "%s".\n' "$name"
+    if depname=$(nix --experimental-features "nix-command flakes" eval --raw "$dep"\#lib.name &2>/dev/null); then
+	deps["$depname"]="$dep"
+	printf 'Added "%s".\n' "$depname"
     else
 	printf 'Error while fetching flake "%s".\n' "$dep"
     fi
@@ -74,14 +74,16 @@ FLAKE
 
   printf "%sdependencies = [\n" "$tab"
   for x in "${!deps[@]}"; do
-      printf "%s  libs.\"%s\"\n" "$tab" "$x"
+      if [[ "$x" != "fpm" ]]; then
+	  printf "%s  libs.\"%s\".lib\n" "$tab" "$x"
+      fi
   done
-  printf "%s]\n" "$tab"
+  printf "%s];\n" "$tab"
   
   printf "%smodules = [\n" "$tab"
   # we detect the local modules automatically
   fd '[.](fsti?|mli?|js)$' -x printf "%s  ./%s\n" "$tab" "{}"
-  printf "%s]\n" "$tab"
+  printf "%s];\n" "$tab"
   
   printf "%splugin-entrypoints = [\n" "$tab"
   # we extract modules containing entrypoints
@@ -89,7 +91,7 @@ FLAKE
       -lU0 '\[@@?[^]]*plugin[^]]*\]' | \
       xargs -IX -0 printf "%s  ./%s\n" "$tab" 'X' | \
       sort -u
-  printf "%s]\n" "$tab"
+  printf "%s];\n" "$tab"
 } > flake.nix
 
 {
