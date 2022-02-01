@@ -42,17 +42,22 @@ let
       fstar-bin =
         let
           base' = pkgs-fstar.fstar;
-          base  = if builtins.hasAttr "override" options
-                  then base'.override options.override
-                  else base';
         in
-          if builtins.hasAttr "patches" options
-             && nixlib.length options.patches > 0
-          then 
-            tools.perform-fstar-to-ocaml base.fstar
-              (pkgs-fstar.fstar.overrideAttrs 
-                (o: {patches = o.patches ++ options.patches;}))
-          else base;
+          if builtins.hasAttr "override" options || ( builtins.hasAttr "patches" options &&
+                                                      nixlib.length options.patches > 0 )
+          then
+            let override = options.override or {}; in
+            if builtins.hasAttr "patches" override
+            then throw "The `override` property of an `fstar-options` should not specify patches."
+            else base'.override (override // {patches = options.patches;})
+          else base';
+          # if builtins.hasAttr "patches" options
+          #    && nixlib.length options.patches > 0
+          # then 
+          #   tools.perform-fstar-to-ocaml base.fstar
+          #     (pkgs-fstar.fstar.overrideAttrs 
+          #       (o: {patches = o.patches ++ options.patches;}))
+          # else base;
     in
       { bin = fstar-bin;
         flags = if builtins.hasAttr "unsafe_tactic_exec" options
