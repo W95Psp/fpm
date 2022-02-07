@@ -24,6 +24,7 @@ mkShell rec {
   FPM_LIB_CHECKED_FILES = import ./checked.nix            deps empty-lib;
   
   FSTAR_BINARY = "${bin-flags.bin}/bin/fstar.exe";
+  FSTAR_FLAGS = "${bin-flags.flags}";
 
   nativeBuildInputs = [ (writeShellScriptBin "fstar.exe" (builtins.readFile ./scripts/fstar-wrapper.sh))
                         z3-bin ];
