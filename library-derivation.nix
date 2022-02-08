@@ -33,6 +33,7 @@ let
       
       # Deal with dependencies: create symbolic links
       for dependency in ${bash-list-of (map (mk fstar-bin-flags) lib.dependencies)}; do
+         echo "dependency: $dependency" >> debug
          find "$dependency/modules/" \( -type f -or -type l \) -exec ln -fs '{}' ./modules/ \;
          find "$dependency/plugins/" \( -type f -or -type l \) -exec ln -fs '{}' ./plugins/ \;
          cat "$dependency/plugin-modules" >> plugin-modules
