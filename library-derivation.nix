@@ -28,6 +28,8 @@ let
       # Prepare folder structure
       mkdir modules plugins
       touch plugin-modules
+      echo 'fstar binary: ${fstar-bin-flags.bin}' > debug
+      echo 'fstar flags: ${fstar-bin-flags.flags}' >> debug
       
       # Deal with dependencies: create symbolic links
       for dependency in ${bash-list-of (map (mk fstar-bin-flags) lib.dependencies)}; do
