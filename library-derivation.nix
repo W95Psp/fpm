@@ -58,13 +58,13 @@ let
                    $(find ./plugins/ \( -type f -or -type l \) -printf "--load_cmxs %P ") \
                    --extract "* -FStar" --odir out --codegen Plugin "$filename"
          # Before compiling, we link every OCaml module we might dependend on
-         find ./modules/ \( -type f -or -type l \) \( -name '*.ml' -or -name '*.ml' \) \
+         cd out
+         find ../modules/ \( -type f -or -type l \) \( -name '*.ml' -or -name '*.ml' \) \
               -printf '%P\0' | while IFS= read -r -d ''' f; do
               rm -f "./out/$f" # always prefer the modules given by `lib` or by its dependencies
-              ln -s "./modules/$f" "./out/$f" 
+              ln -s "../modules/$f" "./$f"
          done
          # Compile OCaml extracted code
-         cd out
          ocamlbuild -use-ocamlfind -cflag -g -package fstar-tactics-lib "$cmxsname"
          # Save the CMXS native OCaml library (that is, the native F* plugin)
          cp "_build/$cmxsname" "../plugins/$cmxsname"
