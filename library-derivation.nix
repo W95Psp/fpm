@@ -60,7 +60,7 @@ let
          # Before compiling, we link every OCaml module we might dependend on
          find ./modules/ \( -type f -or -type l \) \( -name '*.ml' -or -name '*.ml' \) \
               -printf '%P\0' | while IFS= read -r -d ''' f; do
-              rm -r "./out/$f" # always prefer the modules given by `lib` or by its dependencies
+              rm -f "./out/$f" # always prefer the modules given by `lib` or by its dependencies
               ln -s "./modules/$f" "./out/$f" 
          done
          # Compile OCaml extracted code
