@@ -13,7 +13,7 @@ lib:
 let bin-flags = fstar-bin-flags-of-lib lib;
     empty-lib = { name = "${lib.name}-dependencies";
                   modules = [];
-                  inherit (lib) dependencies;
+                  inherit (lib) dependencies fstar-options;
                   plugin-entrypoints = []; }; in
 mkShell rec {
   name = "${lib.name}-dev-env";
