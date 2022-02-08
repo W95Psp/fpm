@@ -79,6 +79,7 @@ let
       mkdir $out
       # Make sure no native plugin is mentioned twice (TODO: this should never happen. Throw error?)
       cat plugin-modules | sort -u > $out/plugin-modules
+      cp debug $out/debug
       mv modules $out/modules # we install modules
       mv plugins $out/plugins # we install plugins
     '';
