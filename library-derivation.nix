@@ -17,10 +17,9 @@
 
 { nixlib, mkDerivation, fstar-dependencies, findutils, fstar-bin-flags-of-lib, ... }:
 let
-  mk = lib: let
+  mk = fstar-bin-flags: lib: let
     plugin-entrypoints = lib.plugin-entrypoints or [];
     bash-list-of = l: nixlib.concatMapStringsSep " " (x: nixlib.escapeShellArg "${x}") l;
-    fstar-bin-flags = fstar-bin-flags-of-lib lib;
   in mkDerivation {
     name = "${lib.name}-lib";
     phases = [ "buildPhase" "installPhase" ];
@@ -31,7 +30,7 @@ let
       touch plugin-modules
       
       # Deal with dependencies: create symbolic links
-      for dependency in ${bash-list-of (map mk lib.dependencies)}; do
+      for dependency in ${bash-list-of (map (mk fstar-bin-flags) lib.dependencies)}; do
          find "$dependency/modules/" \( -type f -or -type l \) -exec ln -fs '{}' ./modules/ \;
          find "$dependency/plugins/" \( -type f -or -type l \) -exec ln -fs '{}' ./plugins/ \;
          cat "$dependency/plugin-modules" >> plugin-modules
@@ -81,4 +80,5 @@ let
       mv plugins $out/plugins # we install plugins
     '';
   };
-in mk
+in
+lib: mk (fstar-bin-flags-of-lib lib) lib
