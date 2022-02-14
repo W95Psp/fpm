@@ -38,6 +38,7 @@ let
          find "$dependency/plugins/" \( -type f -or -type l \) -exec ln -fs '{}' ./plugins/ \;
          cat "$dependency/plugin-modules" >> plugin-modules
       done
+      pluginModules=$(cat "plugin-modules" | xargs -IP echo "--load_cmxs P " | paste -sd " ")
 
       # Deal with `lib`'s own modules
       ${
@@ -55,9 +56,10 @@ let
          cmxsname="$ocamlname.cmxs"           # `A.B.C.D.fst` → `A_B_C_D.
          mkdir out                            # Temporary `out`put folder for F*
          # We extract OCaml code from the module declared in file `filename`
+         echo "Plugins to load: $(find ./plugins/ \( -type f -or -type l \) -printf "--load_cmxs %P ")"
          fstar.exe ${fstar-bin-flags.flags} \
                    --include ./modules/ --include ./plugins/ \
-                   $(find ./plugins/ \( -type f -or -type l \) -printf "--load_cmxs %P ") \
+                   $(echo "$pluginModules") \
                    --extract "* -FStar" --odir out --codegen Plugin "$filename"
          # Before compiling, we link every OCaml module we might dependend on
          cd out
