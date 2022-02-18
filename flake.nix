@@ -27,14 +27,7 @@
           opt = {
             inherit nixlib fstar-bin-flags-of-lib;
             inherit (pkgs) writeShellScriptBin writeText mkShell findutils;
-            fstar-dependencies =
-              [pkgs-fstar.z3] ++
-              (with pkgs.ocamlPackages;
-                [ ocaml
-                  ocamlbuild findlib batteries stdint zarith yojson fileutils pprint
-                  menhir ppx_deriving ppx_deriving_yojson process ocaml-migrate-parsetree
-                  sedlex_2
-                ]);
+            fstar-dependencies = pkgs-fstar.fstar.buildInputs;
             fstar-bin = pkgs-fstar.fstar;
             z3-bin = pkgs-fstar.z3;
             mkDerivation = pkgs.stdenv.mkDerivation;
