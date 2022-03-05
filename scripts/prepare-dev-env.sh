@@ -29,7 +29,7 @@ remap_as_local_include_path () {
     # Then, we try to find the longest suffix of `components` so that the path exists under `FPM_LIB_ROOT`
     for i in $(seq 1 "${#components[@]}"); do
 	# `p` is the path we reconstruct
-        p="$FPM_LIB_ROOT/$(IFS=/ ; echo "${chunks[*]:$i}")"
+        p="$FPM_LIB_ROOT/$(IFS=/ ; echo "${components[*]:$i}")"
         test -f "$p" && {
 	    # if `p` is a valid path, then we return its parent
 	    # directory (we just need the directory)
