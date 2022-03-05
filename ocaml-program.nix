@@ -1,13 +1,13 @@
 { nixlib, mkDerivation, writeText,
   # runCommand,
-  fstar-bin-flags-of-lib, z3-bin, fstar-bin, fstar-dependencies, findutils, mkShell, ... }:
+  fstar-options-tools, z3-bin, fstar-bin, fstar-dependencies, findutils, mkShell, ... }:
 let
   validator = import ./validator.nix nixlib;
   library-derivation = import ./library-derivation.nix {
-    inherit nixlib mkDerivation fstar-dependencies fstar-bin-flags-of-lib findutils;
+    inherit nixlib mkDerivation fstar-dependencies fstar-options-tools findutils;
   };
   generate-checked = (import ./checked.nix {
-    inherit nixlib mkDerivation fstar-dependencies fstar-bin-flags-of-lib
+    inherit nixlib mkDerivation fstar-dependencies fstar-options-tools
       writeText z3-bin findutils fstar-bin;
   });
   get-ocaml = {
@@ -29,7 +29,8 @@ let
         modules = modules;
         # modules = nixlib.unique ([entrypoint] ++ modules);
       };
-      der = library-derivation lib;
+      fstar-bin-flags = fstar-options-tools.mk-fstar (fstar-options-tools.options-of-lib lib);
+      der = library-derivation fstar-bin-flags lib;
       driver-name = "OCamlDriver";
       validator' = lib: next:
         builtins.deepSeq
@@ -38,7 +39,6 @@ let
             else throw ''`target` was expected to be "byte" or "native", got "${toString target}"''
           )
           (validator lib next);
-      fstar-bin-flags = fstar-bin-flags-of-lib lib;
       modules-path = nixlib.escapeShellArg "${der}/modules/";
       implemented-interfaces = nixlib.filter (x:
         builtins.trace ">>>>>>>>>>" (
@@ -77,7 +77,7 @@ let
         # echo "#################################3"
         # echo "#################################3"
         # echo "#################################3"
-        # TODO: add flag to use cmi: `--cmi --cache_dir $ {nixlib.escapeShellArg (generate-checked lib)}`
+        # TODO: add flag to use cmi: `--cmi --cache_dir $ {nixlib.escapeShellArg (generate-checked TODO-opts lib)}`
         for module in ${nixlib.concatMapStringsSep " " nixlib.escapeShellArg (implemented-interfaces ++ [(builtins.baseNameOf entrypoint)])}; do
           fstar.exe ${fstar-bin-flags.flags}\
                     --include ${modules-path} \

@@ -22,10 +22,12 @@
           pkgs = nixpkgs.legacyPackages.${system};
           pkgs-fstar = fstar-flake.packages.${system};
           tools = fstar-flake.lib.${system};
-          fstar-bin-tools = import ./fstar-options.nix nixlib;
-          fstar-bin-flags-of-lib = lib: fstar-bin-tools.mk-fstar system fstar-flake (fstar-bin-tools.options-of-lib lib);
+          fstar-options-tools =
+            let tools = import ./fstar-options.nix nixlib; in
+            tools // {mk-fstar = tools.mk-fstar system fstar-flake;};
+          # fstar-bin-flags-of-lib = lib: ;
           opt = {
-            inherit nixlib fstar-bin-flags-of-lib;
+            inherit nixlib fstar-options-tools;
             inherit (pkgs) writeShellScriptBin writeText mkShell findutils;
             fstar-dependencies = pkgs-fstar.fstar.buildInputs;
             fstar-bin = pkgs-fstar.fstar;
@@ -34,7 +36,7 @@
           };
         in
           {
-            library-derivation = import ./library-derivation.nix opt;
+            # library-derivation = import ./library-derivation.nix opt;
             library-dev-env = import ./library-dev-env.nix opt;
             ocaml-program = import ./ocaml-program.nix opt;
             js-program = import ./js/js-program.nix (opt // {

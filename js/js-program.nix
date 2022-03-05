@@ -1,4 +1,4 @@
-{ nixlib, mkDerivation, writeShellScriptBin, fstar-bin-flags-of-lib,
+{ nixlib, mkDerivation, writeShellScriptBin,
   z3-bin, fstar-dependencies, findutils, mkShell, js_of_ocaml, js_of_ocaml-ppx,
   zarith_stubs_js, ...
 }@args:

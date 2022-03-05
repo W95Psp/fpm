@@ -1,10 +1,11 @@
-{ nixlib, mkDerivation, writeText, fstar-dependencies, fstar-bin, z3-bin,
-  fstar-bin-flags-of-lib, findutils, ... }:
+{ nixlib, mkDerivation, writeText, fstar-dependencies, z3-bin,
+  findutils, ... }:
+opts: lib:
 let
-  mkder = import ./library-derivation.nix { inherit nixlib mkDerivation fstar-dependencies findutils fstar-bin-flags-of-lib; };
+  mkder = import ./library-derivation.nix { inherit nixlib mkDerivation fstar-dependencies findutils; };
   generate-checked = lib:
     let
-      src = mkder lib;
+      src = mkder opts lib;
       bash-list-of = l: nixlib.concatMapStringsSep " " (x: nixlib.escapeShellArg "${x}") l;
       module-names = (map nixlib.head
                           (builtins.filter
@@ -21,7 +22,7 @@ let
       # then run make so that we generate checked in a correct order
     mkDerivation {
       name = "${lib.name}-checked";
-      buildInputs = [fstar-bin z3-bin findutils];
+      buildInputs = [opts.bin z3-bin findutils];
       phases = ["buildPhase" "installPhase"];
       buildPhase = ''
         mkdir checked
@@ -58,5 +59,8 @@ checked/%.checked:
     }
   ;
 in
-generate-checked
+
+
+builtins.trace (builtins.toJSON {bin=toString opts.bin; options=opts.options;})
+  (  generate-checked lib)
 

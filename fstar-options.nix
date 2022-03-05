@@ -30,10 +30,18 @@ let
   # Compute the attrset of F* options for a library, merging every F* options from every dependencies
   # (a dependency might require a patch or a specific flag to operate)
   options-of-lib = lib:
-    nixlib.foldl
-      merge
-      (lib.fstar-options or {}) 
-      (map options-of-lib lib.dependencies);
+    let
+      options = nixlib.foldl
+        merge
+        (lib.fstar-options or {}) 
+        (map options-of-lib lib.dependencies);
+      debug = builtins.toJSON {
+        fn = "options-of-lib";
+        inherit lib options;
+      };
+    in
+      options;
+      # builtins.deepSeq debug (builtins.trace debug options);
   # Compute an F* binary and set of flags given an attrset of F* options
   mk-fstar = system: fstar-flake: options:
     let
@@ -49,7 +57,9 @@ let
             let override = options.override or {}; in
             if builtins.hasAttr "patches" override
             then throw "The `override` property of an `fstar-options` should not specify patches."
-            else base'.override (override // {patches = options.patches;})
+            else base'.override (override // {
+              patches = nixlib.unique (map (x: "${x}") options.patches);
+            })
           else base';
           # if builtins.hasAttr "patches" options
           #    && nixlib.length options.patches > 0
@@ -64,6 +74,7 @@ let
                    && options.unsafe_tactic_exec
                 then "--unsafe_tactic_exec"
                 else "";
+        inherit options;
       };
 in
 { inherit merge options-of-lib mk-fstar; }

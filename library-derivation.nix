@@ -15,7 +15,7 @@
 
 # `./plugin-modules`: a file containing a listing of available plugins.
 
-{ nixlib, mkDerivation, fstar-dependencies, findutils, fstar-bin-flags-of-lib, ... }:
+{ nixlib, mkDerivation, fstar-dependencies, findutils, ... }:
 let
   mk = fstar-bin-flags: lib: let
     plugin-entrypoints = lib.plugin-entrypoints or [];
@@ -87,4 +87,4 @@ let
     '';
   };
 in
-lib: mk (fstar-bin-flags-of-lib lib) lib
+opts: lib: mk opts lib
