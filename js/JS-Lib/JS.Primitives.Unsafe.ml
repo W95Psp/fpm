@@ -27,7 +27,7 @@ let new_obj (f: js_any) (args: js_any list): js_any
 (* let new_obj_arr (f: js_any) (args: js_any js_array): js_any
  *   = Js.Unsafe.new_obj_arr f args *)
 
-let obj (values: (string * js_any) list): js_any
+let obj (values: (Prims.string * js_any) list): js_any
   = Js.Unsafe.obj (Array.of_list values)
 
 let global: js_any = Js.Unsafe.js_expr "(globalThis || window || global)"
@@ -45,6 +45,6 @@ let wrap_fun (f: 'a -> 'b): js_any
 
 let debugger = Js.debugger
 
-let js_expr_pure (s: string): 'a
+let js_expr_pure (s: Prims.string): 'a
   = Js.Unsafe.js_expr s
 
