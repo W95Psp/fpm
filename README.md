@@ -5,7 +5,8 @@ Given a list of F* modules and of (git-based) F* dependencies, FPM automatically
  - automatic OCaml compilation (if needed);
  - automatic JavaScript compilation (if needed).
  
-Run `nix run github:W95Psp/fpm#create` to interactively setup FPM on a local folder.
+Run `nix --experimental-features flakes --extra-experimental-features nix-command run github
+:W95Psp/fpm#create` to interactively setup FPM on a local folder.
  
 # Example
 ## OCaml Hello World
