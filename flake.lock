@@ -38,11 +38,11 @@
         "nixpkgs-unstable": "nixpkgs-unstable"
       },
       "locked": {
-        "lastModified": 1655210517,
-        "narHash": "sha256-C62UaKMLm6oDP47vEJxNueKgUymM/EtvBEVbml6EE3M=",
+        "lastModified": 1659004174,
+        "narHash": "sha256-uE2A4gJbduPHuJ5CmlvT4fbj0BNnsrQdOGMsbgg+eRs=",
         "owner": "W95Psp",
         "repo": "nix-flake-fstar",
-        "rev": "fe34716d7b114ea7bbdca88afdb277314ef5af58",
+        "rev": "a21760b2e4065a052b837fd000db1e6be6bef5df",
         "type": "github"
       },
       "original": {
