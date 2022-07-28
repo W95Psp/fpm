@@ -43,6 +43,7 @@
               inherit (pkgs.ocamlPackages) js_of_ocaml js_of_ocaml-ppx;
               inherit zarith_stubs_js;
             });
+            inherit fstar-options-tools;
           };
       # Given a library `lib`, and a set of binary targets (`(ocaml|js)-programs`)
       # `mkFlake` produces a flake output
@@ -60,6 +61,7 @@
                 f = functions system fstar-options;
                 s = {
                   fstar-lib = lib;
+                  fstar-bin = (f.fstar-options-tools.mk-fstar (f.fstar-options-tools.options-of-lib lib)).bin;
                   # For each JS or OCaml program, we generate a derivation
                   apps = builtins.mapAttrs (_: bin: {
                     type = "app";
